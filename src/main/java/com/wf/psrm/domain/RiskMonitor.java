@@ -31,10 +31,10 @@ public class RiskMonitor {
 
 	public RiskMonitor(RiskMonitorCalculator calculator) {
 		this.initialBalance = calculator.getInitialBalance();
-		this.fedwireCredits = calculator.getFedwireCredits();
-		this.fedwireDebits = calculator.getFedwireDebits();
+		this.fedwireCredits = 0;
+		this.fedwireDebits = 0;
 		this.cap = calculator.getCap();
-		this.currentPosition = calculator.getCurrentPosition();
+	//	this.currentPosition = calculator.getCurrentPosition();
 		this.safetyfactor = cap * 0.1;
 	}
 

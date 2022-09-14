@@ -1,7 +1,10 @@
 package com.wf.psrm.controller;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+
+import com.wf.psrm.service.WireDetailsEventsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,16 +18,15 @@ import com.wf.psrm.domain.RiskMonitorCalculator;
 public class PsrmController {
 
 	@Autowired
-	RiskMonitorCalculator c1;
+	private WireDetailsEventsService wireDetailsEventsService;
 
 	@PostMapping("/v1/psrm/account")
-	public ResponseEntity<RiskMonitorCalculator> postEvent(@RequestParam HashMap<String, Double> req)
+	public ResponseEntity<Optional<?>> postEvent(@RequestParam HashMap<String, Double> req)
 			throws JsonProcessingException, ExecutionException, InterruptedException {
-
-		c1.setInitialBalance(Double.parseDouble(String.valueOf(req.get("balance"))));
-		c1.setCap(Double.parseDouble(String.valueOf(req.get("cap"))));
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(c1);
+		double initialBalance=Double.parseDouble(String.valueOf(req.get("balance")));
+		double cap=Double.parseDouble(String.valueOf(req.get("cap")));
+		wireDetailsEventsService.kickOffTheDay(initialBalance,cap);
+		return ResponseEntity.status(HttpStatus.CREATED).body(Optional.empty());
 	}
 
 }

@@ -45,60 +45,25 @@ public class WireDetailsEventsService {
 	@Autowired
 	RiskMonitorCalculator c1;
 
+	RiskMonitor rM;
+
 	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
 			throws IOException {
 
 		WireDetailsEvent wireDetailsEvent = objectMapper.readValue(consumerRecord.value(), WireDetailsEvent.class);
 		log.info("wireDetailsEvent : {} ", wireDetailsEvent);
-
-//		if (wireDetailsEvent.getWireDetailsEventId() != null && wireDetailsEvent.getWireDetailsEventId() == 000) {
-//			throw new RecoverableDataAccessException("Temporary Network Issue");
-//		}
-//
-//		switch (wireDetailsEvent.getWireDetailsEventType()) {
-//		case NEW:
-//			save(wireDetailsEvent);
-//			break;
-//		case UPDATE:
-//			// validate the libraryevent
-//			validate(wireDetailsEvent);
-//			save(wireDetailsEvent);
-//			break;
-//		default:
-//			log.info("Invalid Library Event Type");
-//		}
-
-		RiskMonitor rM = new RiskMonitor(c1);
-
 		if (wireDetailsEvent.getPayeeiswells().equals("Y") && wireDetailsEvent.getPayoriswells().equals("N")) {
 			rM.addCredit(wireDetailsEvent.getAmt());
 		} else {
 			rM.addDebit(wireDetailsEvent.getAmt());
 		}
 		rM.calculate();
-
 		save(wireDetailsEvent);
-
 		save(rM);
-
 		c1.update(rM);
-
 		return c1;
-
 	}
 
-//	private void validate(WireDetailsEvent wireDetailsEvent) {
-//		if (wireDetailsEvent.getWireDetailsEventId() == null) {
-//			throw new IllegalArgumentException("Library Event Id is missing");
-//		}
-//
-//		Optional<WireDetailsEvent> wireDetailsEventOptional = wireDetailsEventsRepository
-//				.findById(wireDetailsEvent.getWireDetailsEventId());
-//		if (!wireDetailsEventOptional.isPresent()) {
-//			throw new IllegalArgumentException("Not a valid library Event");
-//		}
-//		log.info("Validation is successful for the library Event : {} ", wireDetailsEventOptional.get());
-//	}
 
 	private void save(RiskMonitor rM) {
 		riskMonitorRepository.save(rM);
@@ -106,9 +71,7 @@ public class WireDetailsEventsService {
 	}
 
 	private void save(WireDetailsEvent wireDetailsEvent) {
-
 		wireDetailsEventsRepository.save(wireDetailsEvent);
-
 		log.info("Successfully Persisted the Event {} ", wireDetailsEvent);
 	}
 
@@ -145,4 +108,9 @@ public class WireDetailsEventsService {
 				result.getRecordMetadata().partition());
 	}
 
+	public void kickOffTheDay(double initialBalance, double cap) {
+		c1.setCap(cap);
+		c1.setInitialBalance(initialBalance);
+		rM=new RiskMonitor(c1);
+	}
 }
