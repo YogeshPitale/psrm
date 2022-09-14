@@ -22,6 +22,7 @@ public class RiskMonitorCalculator {
 	private double maxAvailable;
 	private double netFedWirePosition;
 	private double currentPosition;
+	private String timeStamp;
 
 	public void update(RiskMonitor calculator) {
 		this.initialBalance = calculator.getInitialBalance();

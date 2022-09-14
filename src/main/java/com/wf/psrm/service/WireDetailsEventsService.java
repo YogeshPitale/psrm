@@ -1,5 +1,6 @@
 package com.wf.psrm.service;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -15,6 +16,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wf.psrm.controller.PsrmController;
 import com.wf.psrm.domain.RiskMonitor;
 import com.wf.psrm.domain.RiskMonitorCalculator;
 import com.wf.psrm.domain.WireDetailsEvent;
@@ -43,7 +45,8 @@ public class WireDetailsEventsService {
 	@Autowired
 	RiskMonitorCalculator c1;
 
-	public void processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord) throws JsonProcessingException {
+	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
+			throws IOException {
 
 		WireDetailsEvent wireDetailsEvent = objectMapper.readValue(consumerRecord.value(), WireDetailsEvent.class);
 		log.info("wireDetailsEvent : {} ", wireDetailsEvent);
@@ -76,10 +79,11 @@ public class WireDetailsEventsService {
 
 		save(wireDetailsEvent);
 
-//		RiskMonitor c2 = new RiskMonitor(c1);
 		save(rM);
-		
+
 		c1.update(rM);
+
+		return c1;
 
 	}
 
@@ -102,9 +106,9 @@ public class WireDetailsEventsService {
 	}
 
 	private void save(WireDetailsEvent wireDetailsEvent) {
-//		wireDetailsEvent.getBook().setWireDetailsEvent(wireDetailsEvent);
+
 		wireDetailsEventsRepository.save(wireDetailsEvent);
-//		calculatorRepository.save(c);
+
 		log.info("Successfully Persisted the Event {} ", wireDetailsEvent);
 	}
 
