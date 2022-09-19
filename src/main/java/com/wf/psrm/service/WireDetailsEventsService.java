@@ -3,6 +3,7 @@ package com.wf.psrm.service;
 import java.io.IOException;
 import java.util.Optional;
 
+import com.wf.psrm.domain.RiskMonitorMoney;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -46,6 +47,7 @@ public class WireDetailsEventsService {
 	RiskMonitorCalculator c1;
 
 	RiskMonitor rM;
+	RiskMonitorMoney riskMonitorMoney;
 
 	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
 			throws IOException {
@@ -54,13 +56,18 @@ public class WireDetailsEventsService {
 		log.info("wireDetailsEvent : {} ", wireDetailsEvent);
 		if (wireDetailsEvent.getPayeeiswells().equals("Y") && wireDetailsEvent.getPayoriswells().equals("N")) {
 			rM.addCredit(wireDetailsEvent.getAmt());
+		//	riskMonitorMoney.addCredit(wireDetailsEvent.getAmt());
 		} else {
 			rM.addDebit(wireDetailsEvent.getAmt());
+		//	riskMonitorMoney.addDebit(wireDetailsEvent.getAmt());
 		}
 		rM.calculate();
+		//riskMonitorMoney.calculate();
 		save(wireDetailsEvent);
 		save(rM);
 		c1.update(rM);
+		//c1.update(riskMonitorMoney);
+		log.info(c1.toString());
 		return c1;
 	}
 
@@ -112,5 +119,6 @@ public class WireDetailsEventsService {
 		c1.setCap(cap);
 		c1.setInitialBalance(initialBalance);
 		rM=new RiskMonitor(c1);
+		//riskMonitorMoney = new RiskMonitorMoney(c1);
 	}
 }

@@ -9,6 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.joda.money.Money;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -30,6 +34,7 @@ public class RiskMonitor {
 	private double currentPosition;
 
 	public RiskMonitor(RiskMonitorCalculator calculator) {
+
 		this.initialBalance = calculator.getInitialBalance();
 		this.fedwireCredits = 0;
 		this.fedwireDebits = 0;
@@ -39,18 +44,25 @@ public class RiskMonitor {
 	}
 
 	public RiskMonitor calculate() {
-		netFedWirePosition = fedwireCredits - fedwireDebits;
-		currentPosition = initialBalance + netFedWirePosition;
-		maxAvailable = currentPosition + cap - safetyfactor;
+		Money money = Money.parse("USD 23.87");
+		netFedWirePosition = round(fedwireCredits - fedwireDebits,2);
+		currentPosition = round(initialBalance + netFedWirePosition,2);
+		maxAvailable = round(currentPosition + cap - safetyfactor,2);
 		return this;
 	}
 
 	public void addCredit(double amt) {
-		fedwireCredits = fedwireCredits + amt;
+		fedwireCredits = round(fedwireCredits + amt,2);
 	}
 
 	public void addDebit(double amt) {
-		fedwireDebits = fedwireDebits + amt;
+		fedwireDebits = round(fedwireDebits + amt,2);
 	}
 
+	private static double round (double value, int places) {
+		if (places < 0) throw new IllegalArgumentException();
+		BigDecimal bd = BigDecimal.valueOf(value);
+		bd = bd.setScale(places, RoundingMode.HALF_UP);
+		return bd.doubleValue();
+	}
 }
