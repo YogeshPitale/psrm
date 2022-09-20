@@ -1,9 +1,10 @@
 package com.wf.psrm.service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
-import com.wf.psrm.domain.RiskMonitorMoney;
+//import com.wf.psrm.domain.RiskMonitorMoney;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -47,7 +48,7 @@ public class WireDetailsEventsService {
 	RiskMonitorCalculator c1;
 
 	RiskMonitor rM;
-	RiskMonitorMoney riskMonitorMoney;
+//	RiskMonitorMoney riskMonitorMoney;
 
 	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
 			throws IOException {
@@ -64,7 +65,13 @@ public class WireDetailsEventsService {
 		rM.calculate();
 		//riskMonitorMoney.calculate();
 		save(wireDetailsEvent);
-		save(rM);
+		
+		RiskMonitor tempMonitor = new RiskMonitor(rM);
+		tempMonitor.setTimeStamp(wireDetailsEvent.getEvtDtTm());
+		tempMonitor.setNm(wireDetailsEvent.getNm());
+		save(tempMonitor);
+//		save(rM);
+		
 		c1.update(rM);
 		//c1.update(riskMonitorMoney);
 		log.info(c1.toString());
@@ -120,5 +127,9 @@ public class WireDetailsEventsService {
 		c1.setInitialBalance(initialBalance);
 		rM=new RiskMonitor(c1);
 		//riskMonitorMoney = new RiskMonitorMoney(c1);
+	}
+	
+	public List<RiskMonitor> getAllRiskMonitor(){
+		return (List<RiskMonitor>) riskMonitorRepository.findAll();
 	}
 }

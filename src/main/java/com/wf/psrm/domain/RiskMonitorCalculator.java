@@ -35,15 +35,15 @@ public class RiskMonitorCalculator {
 		this.currentPosition = calculator.getCurrentPosition();
 	}
 
-	public void update(RiskMonitorMoney riskMonitorMoney) {
-		this.initialBalance = riskMonitorMoney.getInitialBalance().getAmount().doubleValue();
-		this.fedwireCredits = riskMonitorMoney.getFedwireCredits().getAmount().doubleValue();
-		this.fedwireDebits = riskMonitorMoney.getFedwireDebits().getAmount().doubleValue();
-		this.cap = riskMonitorMoney.getCap().getAmount().doubleValue();
-		this.safetyfactor = riskMonitorMoney.getSafetyfactor().getAmount().doubleValue();
-		this.maxAvailable = riskMonitorMoney.getMaxAvailable().getAmount().doubleValue();
-		this.netFedWirePosition = riskMonitorMoney.getNetFedWirePosition().getAmount().doubleValue();
-		this.currentPosition = riskMonitorMoney.getCurrentPosition().getAmount().doubleValue();
-	}
+//	public void update(RiskMonitorMoney riskMonitorMoney) {
+//		this.initialBalance = riskMonitorMoney.getInitialBalance().getAmount().doubleValue();
+//		this.fedwireCredits = riskMonitorMoney.getFedwireCredits().getAmount().doubleValue();
+//		this.fedwireDebits = riskMonitorMoney.getFedwireDebits().getAmount().doubleValue();
+//		this.cap = riskMonitorMoney.getCap().getAmount().doubleValue();
+//		this.safetyfactor = riskMonitorMoney.getSafetyfactor().getAmount().doubleValue();
+//		this.maxAvailable = riskMonitorMoney.getMaxAvailable().getAmount().doubleValue();
+//		this.netFedWirePosition = riskMonitorMoney.getNetFedWirePosition().getAmount().doubleValue();
+//		this.currentPosition = riskMonitorMoney.getCurrentPosition().getAmount().doubleValue();
+//	}
 
 }

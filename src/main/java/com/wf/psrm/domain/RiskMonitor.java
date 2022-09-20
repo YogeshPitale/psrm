@@ -32,6 +32,8 @@ public class RiskMonitor {
 	private double maxAvailable;
 	private double netFedWirePosition;
 	private double currentPosition;
+	private String timeStamp;
+	private String nm;
 
 	public RiskMonitor(RiskMonitorCalculator calculator) {
 
@@ -64,5 +66,17 @@ public class RiskMonitor {
 		BigDecimal bd = BigDecimal.valueOf(value);
 		bd = bd.setScale(places, RoundingMode.HALF_UP);
 		return bd.doubleValue();
+	}
+
+	public RiskMonitor(RiskMonitor rM) {
+		super();
+		this.initialBalance = rM.initialBalance;
+		this.fedwireCredits = rM.fedwireCredits;
+		this.fedwireDebits = rM.fedwireDebits;
+		this.cap = rM.cap;
+		this.safetyfactor = rM.safetyfactor;
+		this.maxAvailable = rM.maxAvailable;
+		this.netFedWirePosition = rM.netFedWirePosition;
+		this.currentPosition = rM.currentPosition;
 	}
 }
