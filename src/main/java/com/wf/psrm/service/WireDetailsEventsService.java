@@ -75,14 +75,16 @@ public class WireDetailsEventsService {
 		if (wireDetailsEvent.getPayeeiswells().equals("Y") && wireDetailsEvent.getPayoriswells().equals("N")) {
 			tempMonitor.setCreditAmt(wireDetailsEvent.getAmt());
 			tempMonitor.setDebitAmt(-1);
+			tempMonitor.setStatus("Released");			
 		} else {
 			tempMonitor.setCreditAmt(-1);
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
-		}
-		if(wireDetailsEvent.getPmtRail().equals("XCCY")) {
-			tempMonitor.setStatus("On Hold");
-		} else {
-			tempMonitor.setStatus("Released");
+			if(wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
+				tempMonitor.setStatus("On Hold");
+				log.info("Transaction On Hold");
+			} else {
+				tempMonitor.setStatus("Released");
+			}
 		}
 		save(tempMonitor);
 //		save(rM);
@@ -149,6 +151,9 @@ public class WireDetailsEventsService {
 	}
 	
 	public int getCount() {
+		if(rM == null) {
+			return 0;
+		}
 		return rM.getOnHoldCount();
 	}
 }
