@@ -34,6 +34,10 @@ public class RiskMonitor {
 	private double currentPosition;
 	private String timeStamp;
 	private String nm;
+	private String status;
+	private double creditAmt;
+	private double DebitAmt;
+	private int onHoldCount;
 
 	public RiskMonitor(RiskMonitorCalculator calculator) {
 
@@ -43,6 +47,7 @@ public class RiskMonitor {
 		this.cap = calculator.getCap();
 	//	this.currentPosition = calculator.getCurrentPosition();
 		this.safetyfactor = cap * 0.1;
+		this.onHoldCount = 0;
 	}
 
 	public RiskMonitor calculate() {
@@ -78,5 +83,10 @@ public class RiskMonitor {
 		this.maxAvailable = rM.maxAvailable;
 		this.netFedWirePosition = rM.netFedWirePosition;
 		this.currentPosition = rM.currentPosition;
+		this.onHoldCount = rM.onHoldCount;
+	}
+	
+	public void setOnHoldCount() {
+		this.onHoldCount+=1;
 	}
 }

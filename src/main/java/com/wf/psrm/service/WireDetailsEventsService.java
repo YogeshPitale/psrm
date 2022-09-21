@@ -62,6 +62,9 @@ public class WireDetailsEventsService {
 			rM.addDebit(wireDetailsEvent.getAmt());
 		//	riskMonitorMoney.addDebit(wireDetailsEvent.getAmt());
 		}
+		if(wireDetailsEvent.getPmtRail().equals("XCCY")) {
+			rM.setOnHoldCount();
+		}
 		rM.calculate();
 		//riskMonitorMoney.calculate();
 		save(wireDetailsEvent);
@@ -69,6 +72,18 @@ public class WireDetailsEventsService {
 		RiskMonitor tempMonitor = new RiskMonitor(rM);
 		tempMonitor.setTimeStamp(wireDetailsEvent.getEvtDtTm());
 		tempMonitor.setNm(wireDetailsEvent.getNm());
+		if (wireDetailsEvent.getPayeeiswells().equals("Y") && wireDetailsEvent.getPayoriswells().equals("N")) {
+			tempMonitor.setCreditAmt(wireDetailsEvent.getAmt());
+			tempMonitor.setDebitAmt(-1);
+		} else {
+			tempMonitor.setCreditAmt(-1);
+			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
+		}
+		if(wireDetailsEvent.getPmtRail().equals("XCCY")) {
+			tempMonitor.setStatus("On Hold");
+		} else {
+			tempMonitor.setStatus("Released");
+		}
 		save(tempMonitor);
 //		save(rM);
 		
@@ -131,5 +146,9 @@ public class WireDetailsEventsService {
 	
 	public List<RiskMonitor> getAllRiskMonitor(){
 		return (List<RiskMonitor>) riskMonitorRepository.findAll();
+	}
+	
+	public int getCount() {
+		return rM.getOnHoldCount();
 	}
 }

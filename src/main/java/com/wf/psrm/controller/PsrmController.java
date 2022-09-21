@@ -38,5 +38,11 @@ public class PsrmController {
 	public List<RiskMonitor> getEvent() {
 		return wireDetailsEventsService.getAllRiskMonitor();
 	}
+	
+	@CrossOrigin
+	@GetMapping("/v1/psrm/count")
+	public int getCount() {
+		return wireDetailsEventsService.getCount();
+	}
 
 }
