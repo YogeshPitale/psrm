@@ -86,6 +86,7 @@ public class WireDetailsEventsService {
 				tempMonitor.setStatus("Released");
 			}
 		}
+		tempMonitor.setPmtRail(wireDetailsEvent.getPmtRail());
 		save(tempMonitor);
 //		save(rM);
 		

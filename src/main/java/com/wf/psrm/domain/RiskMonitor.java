@@ -38,6 +38,7 @@ public class RiskMonitor {
 	private double creditAmt;
 	private double DebitAmt;
 	private int onHoldCount;
+	private String pmtRail;
 
 	public RiskMonitor(RiskMonitorCalculator calculator) {
 
@@ -45,29 +46,30 @@ public class RiskMonitor {
 		this.fedwireCredits = 0;
 		this.fedwireDebits = 0;
 		this.cap = calculator.getCap();
-	//	this.currentPosition = calculator.getCurrentPosition();
+		// this.currentPosition = calculator.getCurrentPosition();
 		this.safetyfactor = cap * 0.1;
 		this.onHoldCount = 0;
 	}
 
 	public RiskMonitor calculate() {
 		Money money = Money.parse("USD 23.87");
-		netFedWirePosition = round(fedwireCredits - fedwireDebits,2);
-		currentPosition = round(initialBalance + netFedWirePosition,2);
-		maxAvailable = round(currentPosition + cap - safetyfactor,2);
+		netFedWirePosition = round(fedwireCredits - fedwireDebits, 2);
+		currentPosition = round(initialBalance + netFedWirePosition, 2);
+		maxAvailable = round(currentPosition + cap - safetyfactor, 2);
 		return this;
 	}
 
 	public void addCredit(double amt) {
-		fedwireCredits = round(fedwireCredits + amt,2);
+		fedwireCredits = round(fedwireCredits + amt, 2);
 	}
 
 	public void addDebit(double amt) {
-		fedwireDebits = round(fedwireDebits + amt,2);
+		fedwireDebits = round(fedwireDebits + amt, 2);
 	}
 
-	private static double round (double value, int places) {
-		if (places < 0) throw new IllegalArgumentException();
+	private static double round(double value, int places) {
+		if (places < 0)
+			throw new IllegalArgumentException();
 		BigDecimal bd = BigDecimal.valueOf(value);
 		bd = bd.setScale(places, RoundingMode.HALF_UP);
 		return bd.doubleValue();
@@ -85,8 +87,8 @@ public class RiskMonitor {
 		this.currentPosition = rM.currentPosition;
 		this.onHoldCount = rM.onHoldCount;
 	}
-	
+
 	public void setOnHoldCount() {
-		this.onHoldCount+=1;
+		this.onHoldCount += 1;
 	}
 }
