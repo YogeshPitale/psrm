@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wf.psrm.controller.PsrmController;
 import com.wf.psrm.domain.RiskMonitor;
 import com.wf.psrm.domain.RiskMonitorCalculator;
+import com.wf.psrm.domain.RiskMonitorMoney;
 import com.wf.psrm.domain.WireDetailsEvent;
 import com.wf.psrm.jpa.RiskMonitorRepository;
 import com.wf.psrm.jpa.WireDetailsEventsRepository;
@@ -48,7 +49,7 @@ public class WireDetailsEventsService {
 	RiskMonitorCalculator c1;
 
 	RiskMonitor rM;
-//	RiskMonitorMoney riskMonitorMoney;
+	RiskMonitorMoney riskMonitorMoney;
 
 	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
 			throws IOException {
@@ -57,16 +58,16 @@ public class WireDetailsEventsService {
 		log.info("wireDetailsEvent : {} ", wireDetailsEvent);
 		if (wireDetailsEvent.getPayeeiswells().equals("Y") && wireDetailsEvent.getPayoriswells().equals("N")) {
 			rM.addCredit(wireDetailsEvent.getAmt());
-		//	riskMonitorMoney.addCredit(wireDetailsEvent.getAmt());
+			riskMonitorMoney.addCredit(wireDetailsEvent.getAmt());
 		} else {
 			rM.addDebit(wireDetailsEvent.getAmt());
-		//	riskMonitorMoney.addDebit(wireDetailsEvent.getAmt());
+			riskMonitorMoney.addDebit(wireDetailsEvent.getAmt());
 		}
 		if(wireDetailsEvent.getPmtRail().equals("XCCY")) {
 			rM.setOnHoldCount();
 		}
 		rM.calculate();
-		//riskMonitorMoney.calculate();
+		riskMonitorMoney.calculate();
 		save(wireDetailsEvent);
 		
 		RiskMonitor tempMonitor = new RiskMonitor(rM);
@@ -90,8 +91,10 @@ public class WireDetailsEventsService {
 		save(tempMonitor);
 //		save(rM);
 		
-		c1.update(rM);
-		//c1.update(riskMonitorMoney);
+//		c1.update(rM);
+		log.info("rM : " + rM);
+		log.info("riskMonitorMoney : " + riskMonitorMoney);
+		c1.update(riskMonitorMoney);
 		log.info(c1.toString());
 		return c1;
 	}
@@ -144,7 +147,7 @@ public class WireDetailsEventsService {
 		c1.setCap(cap);
 		c1.setInitialBalance(initialBalance);
 		rM=new RiskMonitor(c1);
-		//riskMonitorMoney = new RiskMonitorMoney(c1);
+		riskMonitorMoney = new RiskMonitorMoney(c1);
 	}
 	
 	public List<RiskMonitor> getAllRiskMonitor(){

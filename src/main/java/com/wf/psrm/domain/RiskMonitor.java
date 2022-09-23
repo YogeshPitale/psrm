@@ -9,8 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.joda.money.Money;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -52,7 +50,7 @@ public class RiskMonitor {
 	}
 
 	public RiskMonitor calculate() {
-		Money money = Money.parse("USD 23.87");
+//		Money money = Money.parse("USD 23.87");
 		netFedWirePosition = round(fedwireCredits - fedwireDebits, 2);
 		currentPosition = round(initialBalance + netFedWirePosition, 2);
 		maxAvailable = round(currentPosition + cap - safetyfactor, 2);

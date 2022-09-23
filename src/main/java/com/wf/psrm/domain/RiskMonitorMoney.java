@@ -32,7 +32,7 @@ public class RiskMonitorMoney {
 	private Money maxAvailable;
 	private Money netFedWirePosition;
 	private Money currentPosition;
-	CurrencyUnit usd = CurrencyUnit.of("USD");
+	final CurrencyUnit usd = CurrencyUnit.of("USD");
 
 	public RiskMonitorMoney(RiskMonitorCalculator calculator) {
 
@@ -45,9 +45,9 @@ public class RiskMonitorMoney {
 	}
 
 	public RiskMonitorMoney calculate() {
-		netFedWirePosition = fedwireCredits.plus(fedwireDebits);
+		netFedWirePosition = fedwireCredits.minus(fedwireDebits);
 		currentPosition = initialBalance.plus(netFedWirePosition);
-		maxAvailable = currentPosition.plus(cap).minus(safetyfactor);
+		maxAvailable = (currentPosition.plus(cap)).minus(safetyfactor);
 		return this;
 	}
 
