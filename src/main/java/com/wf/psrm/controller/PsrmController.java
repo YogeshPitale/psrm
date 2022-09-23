@@ -30,7 +30,7 @@ public class PsrmController {
 		double initialBalance = Double.parseDouble(String.valueOf(req.get("balance")));
 		double cap = Double.parseDouble(String.valueOf(req.get("cap")));
 		wireDetailsEventsService.kickOffTheDay(initialBalance, cap);
-		return ResponseEntity.status(HttpStatus.CREATED).body(Optional.empty());
+		return ResponseEntity.status(HttpStatus.CREATED).body(Optional.of("success"));
 	}
 
 	@CrossOrigin

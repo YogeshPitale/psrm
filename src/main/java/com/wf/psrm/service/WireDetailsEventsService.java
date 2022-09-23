@@ -62,9 +62,6 @@ public class WireDetailsEventsService {
 			rM.addDebit(wireDetailsEvent.getAmt());
 		//	riskMonitorMoney.addDebit(wireDetailsEvent.getAmt());
 		}
-		if(wireDetailsEvent.getPmtRail().equals("XCCY")) {
-			rM.setOnHoldCount();
-		}
 		rM.calculate();
 		//riskMonitorMoney.calculate();
 		save(wireDetailsEvent);
@@ -79,8 +76,11 @@ public class WireDetailsEventsService {
 		} else {
 			tempMonitor.setCreditAmt(-1);
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
-			if(wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
+			if(wireDetailsEvent.getNm().equalsIgnoreCase("CITI")
+					|| wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")
+					|| tempMonitor.getDebitAmt()>800000) {
 				tempMonitor.setStatus("On Hold");
+				rM.setOnHoldCount();
 				log.info("Transaction On Hold");
 			} else {
 				tempMonitor.setStatus("Released");
@@ -144,6 +144,7 @@ public class WireDetailsEventsService {
 		c1.setCap(cap);
 		c1.setInitialBalance(initialBalance);
 		rM=new RiskMonitor(c1);
+		log.info("Rismonitor initialize to cap:"+cap+" Initial balance"+initialBalance);
 		//riskMonitorMoney = new RiskMonitorMoney(c1);
 	}
 	
@@ -153,8 +154,10 @@ public class WireDetailsEventsService {
 	
 	public int getCount() {
 		if(rM == null) {
+			log.info("Initial count 0");
 			return 0;
 		}
+		log.info("Returning count"+rM.getOnHoldCount());
 		return rM.getOnHoldCount();
 	}
 }

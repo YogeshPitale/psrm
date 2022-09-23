@@ -51,19 +51,18 @@ public class RiskMonitor {
 		this.onHoldCount = 0;
 	}
 
-	public RiskMonitor calculate() {
-		Money money = Money.parse("USD 23.87");
+	public synchronized RiskMonitor calculate() {
 		netFedWirePosition = round(fedwireCredits - fedwireDebits, 2);
 		currentPosition = round(initialBalance + netFedWirePosition, 2);
 		maxAvailable = round(currentPosition + cap - safetyfactor, 2);
 		return this;
 	}
 
-	public void addCredit(double amt) {
+	public synchronized void addCredit(double amt) {
 		fedwireCredits = round(fedwireCredits + amt, 2);
 	}
 
-	public void addDebit(double amt) {
+	public synchronized void addDebit(double amt) {
 		fedwireDebits = round(fedwireDebits + amt, 2);
 	}
 
@@ -77,6 +76,7 @@ public class RiskMonitor {
 
 	public RiskMonitor(RiskMonitor rM) {
 		super();
+		RiskMonitor newInstance = new RiskMonitor();
 		this.initialBalance = rM.initialBalance;
 		this.fedwireCredits = rM.fedwireCredits;
 		this.fedwireDebits = rM.fedwireDebits;
