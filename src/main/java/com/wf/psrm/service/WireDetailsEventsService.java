@@ -61,14 +61,6 @@ public class WireDetailsEventsService {
 
 		WireDetailsEvent wireDetailsEvent = objectMapper.readValue(consumerRecord.value(), WireDetailsEvent.class);
 		log.info("wireDetailsEvent : {} ", wireDetailsEvent);
-		if (wireDetailsEvent.getPayeeiswells().equals("Y") && wireDetailsEvent.getPayoriswells().equals("N")) {
-			rM.addCredit(wireDetailsEvent.getAmt());
-			// riskMonitorMoney.addCredit(wireDetailsEvent.getAmt());
-		} else {
-			rM.addDebit(wireDetailsEvent.getAmt());
-			// riskMonitorMoney.addDebit(wireDetailsEvent.getAmt());
-		}
-		rM.calculate();
 		// riskMonitorMoney.calculate();
 		save(wireDetailsEvent);
 
@@ -79,6 +71,8 @@ public class WireDetailsEventsService {
 			tempMonitor.setCreditAmt(wireDetailsEvent.getAmt());
 			tempMonitor.setDebitAmt(-1);
 			tempMonitor.setStatus("Released");
+			rM.addCredit(wireDetailsEvent.getAmt());
+			rM.calculate();
 		} else {
 			tempMonitor.setCreditAmt(-1);
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
@@ -89,6 +83,8 @@ public class WireDetailsEventsService {
 				log.info("Transaction On Hold");
 			} else {
 				tempMonitor.setStatus("Released");
+				rM.addDebit(wireDetailsEvent.getAmt());
+				rM.calculate();
 			}
 		}
 		tempMonitor.setPmtRail(wireDetailsEvent.getPmtRail());
