@@ -38,11 +38,25 @@ public class PsrmController {
 	public List<RiskMonitor> getEvent() {
 		return wireDetailsEventsService.getAllRiskMonitor();
 	}
-	
+
 	@CrossOrigin
 	@GetMapping("/v1/psrm/count")
 	public int getCount() {
 		return wireDetailsEventsService.getCount();
+	}
+
+	@CrossOrigin
+	@PostMapping("/v1/psrm/throttle")
+	public ResponseEntity<Optional<?>> postThrottle(@RequestParam Boolean throttleValue) {
+		Boolean tempValue = wireDetailsEventsService.setThrottle(throttleValue);
+		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempValue));
+	}
+
+	@CrossOrigin
+	@PostMapping("/v1/psrm/amount")
+	public ResponseEntity<Optional<?>> postAmount(@RequestParam Integer amount) {
+		Integer tempAmount = wireDetailsEventsService.setAmount(amount);
+		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempAmount));
 	}
 
 }
