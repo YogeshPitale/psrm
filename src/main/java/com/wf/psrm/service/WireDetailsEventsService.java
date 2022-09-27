@@ -70,7 +70,7 @@ public class WireDetailsEventsService {
 		if (wireDetailsEvent.getPayeeiswells().equals("Y") && wireDetailsEvent.getPayoriswells().equals("N")) {
 			tempMonitor.setCreditAmt(wireDetailsEvent.getAmt());
 			tempMonitor.setDebitAmt(-1);
-			tempMonitor.setStatus("Released");
+			tempMonitor.setStatus("Received");
 			rM.addCredit(wireDetailsEvent.getAmt());
 			rM.calculate();
 		} else {
@@ -144,7 +144,7 @@ public class WireDetailsEventsService {
 		c1.setCap(cap);
 		c1.setInitialBalance(initialBalance);
 		rM = new RiskMonitor(c1);
-		log.info("Rismonitor initialize to cap:" + cap + " Initial balance" + initialBalance);
+		log.info("RiskMonitor initialize to cap:" + cap + " Initial balance" + initialBalance);
 		// riskMonitorMoney = new RiskMonitorMoney(c1);
 	}
 
