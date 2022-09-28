@@ -1,6 +1,7 @@
 package com.wf.psrm.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.dao.RecoverableDataAccessException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -49,56 +51,75 @@ public class WireDetailsEventsService {
 	RiskMonitorCalculator c1;
 
 	RiskMonitor rM;
+
 	RiskMonitorMoney riskMonitorMoney;
+
+	private static Integer dynamicAmount = 800000;
+
+	private static Boolean throttleValue = false;
 
 	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
 			throws IOException {
 
 		WireDetailsEvent wireDetailsEvent = objectMapper.readValue(consumerRecord.value(), WireDetailsEvent.class);
 		log.info("wireDetailsEvent : {} ", wireDetailsEvent);
-		if (wireDetailsEvent.getPayeeiswells().equals("Y") && wireDetailsEvent.getPayoriswells().equals("N")) {
-			rM.addCredit(wireDetailsEvent.getAmt());
-			riskMonitorMoney.addCredit(wireDetailsEvent.getAmt());
-		} else {
-			rM.addDebit(wireDetailsEvent.getAmt());
-			riskMonitorMoney.addDebit(wireDetailsEvent.getAmt());
-		}
-		if(wireDetailsEvent.getPmtRail().equals("XCCY")) {
-			rM.setOnHoldCount();
-		}
-		rM.calculate();
-		riskMonitorMoney.calculate();
+
 		save(wireDetailsEvent);
-		
+
 		RiskMonitor tempMonitor = new RiskMonitor(rM);
 		tempMonitor.setTimeStamp(wireDetailsEvent.getEvtDtTm());
 		tempMonitor.setNm(wireDetailsEvent.getNm());
 		if (wireDetailsEvent.getPayeeiswells().equals("Y") && wireDetailsEvent.getPayoriswells().equals("N")) {
 			tempMonitor.setCreditAmt(wireDetailsEvent.getAmt());
 			tempMonitor.setDebitAmt(-1);
-			tempMonitor.setStatus("Released");			
+			tempMonitor.setStatus("Received");
+			rM.addCredit(wireDetailsEvent.getAmt());
+			rM.calculate();
 		} else {
 			tempMonitor.setCreditAmt(-1);
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
-			if(wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
+			if (throttleValue || wireDetailsEvent.getNm().equalsIgnoreCase("CITI")
+					|| wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")
+					|| tempMonitor.getDebitAmt() > dynamicAmount) {
+				List<String> list = new ArrayList<String>();
+				if (throttleValue) {
+					list.add("Throttling is On");
+				}
+				if (wireDetailsEvent.getNm().equalsIgnoreCase("CITI")) {
+					list.add("Transaction for CITI are kept on hold");
+				}
+				if (wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
+					list.add("All retail trasanctions kept on hold");
+				}
+				if (tempMonitor.getDebitAmt() > dynamicAmount) {
+					list.add("Debit Amount is greater than Threshold");
+				}
+				tempMonitor.setReasonForHold(list.toString());
+				log.info(tempMonitor.getReasonForHold());
 				tempMonitor.setStatus("On Hold");
+				rM.setOnHoldCount();
 				log.info("Transaction On Hold");
 			} else {
 				tempMonitor.setStatus("Released");
+				rM.addDebit(wireDetailsEvent.getAmt());
+				rM.calculate();
 			}
 		}
 		tempMonitor.setPmtRail(wireDetailsEvent.getPmtRail());
 		save(tempMonitor);
 //		save(rM);
-		
+
 //		c1.update(rM);
 		log.info("rM : " + rM);
 		log.info("riskMonitorMoney : " + riskMonitorMoney);
 		c1.update(riskMonitorMoney);
+
+//		c1.update(rM);
+		// c1.update(riskMonitorMoney);
+
 		log.info(c1.toString());
 		return c1;
 	}
-
 
 	private void save(RiskMonitor rM) {
 		riskMonitorRepository.save(rM);
@@ -146,18 +167,36 @@ public class WireDetailsEventsService {
 	public void kickOffTheDay(double initialBalance, double cap) {
 		c1.setCap(cap);
 		c1.setInitialBalance(initialBalance);
-		rM=new RiskMonitor(c1);
+		rM = new RiskMonitor(c1);
 		riskMonitorMoney = new RiskMonitorMoney(c1);
+
+		log.info("RiskMonitor initialize to cap:" + cap + " Initial balance" + initialBalance);
+		// riskMonitorMoney = new RiskMonitorMoney(c1);
+
 	}
-	
-	public List<RiskMonitor> getAllRiskMonitor(){
+
+	public List<RiskMonitor> getAllRiskMonitor() {
 		return (List<RiskMonitor>) riskMonitorRepository.findAll();
 	}
-	
+
 	public int getCount() {
-		if(rM == null) {
+		if (rM == null) {
+			log.info("Initial count 0");
 			return 0;
 		}
+		log.info("Returning count" + rM.getOnHoldCount());
 		return rM.getOnHoldCount();
+	}
+
+	public Boolean setThrottle(Boolean throttleValue) {
+		WireDetailsEventsService.throttleValue = throttleValue;
+		log.info("throttleValue: " + WireDetailsEventsService.throttleValue);
+		return WireDetailsEventsService.throttleValue;
+	}
+
+	public Integer setAmount(Integer amount) {
+		WireDetailsEventsService.dynamicAmount = amount;
+		log.info("dynamicAmount: " + WireDetailsEventsService.dynamicAmount);
+		return WireDetailsEventsService.dynamicAmount;
 	}
 }
