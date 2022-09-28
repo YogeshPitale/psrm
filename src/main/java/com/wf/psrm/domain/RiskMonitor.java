@@ -39,6 +39,7 @@ public class RiskMonitor {
 	private double DebitAmt;
 	private int onHoldCount;
 	private String pmtRail;
+	private String reasonForHold;
 
 	public RiskMonitor(RiskMonitorCalculator calculator) {
 

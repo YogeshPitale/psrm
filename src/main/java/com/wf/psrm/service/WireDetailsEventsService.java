@@ -1,6 +1,7 @@
 package com.wf.psrm.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,6 +79,21 @@ public class WireDetailsEventsService {
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
 			if (throttleValue || wireDetailsEvent.getNm().equalsIgnoreCase("CITI")
 					|| wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL") || tempMonitor.getDebitAmt() > dynamicAmount) {
+				List<String> list = new ArrayList<String>();
+				if(throttleValue) {
+					list.add("Throttling is On");
+				}  
+				if(wireDetailsEvent.getNm().equalsIgnoreCase("CITI")) {
+					list.add("Transaction for CITI are kept on hold");
+				}
+				if(wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
+					list.add("All retail trasanctions kept on hold");
+				}
+				if(tempMonitor.getDebitAmt() > dynamicAmount) {
+					list.add("Debit Amount is greater than Threshold");
+				}
+				tempMonitor.setReasonForHold(list.toString());
+				log.info(tempMonitor.getReasonForHold());
 				tempMonitor.setStatus("On Hold");
 				rM.setOnHoldCount();
 				log.info("Transaction On Hold");
