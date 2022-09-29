@@ -75,6 +75,8 @@ public class WireDetailsEventsService {
 			tempMonitor.setStatus("Received");
 			rM.addCredit(wireDetailsEvent.getAmt());
 			rM.calculate();
+			riskMonitorMoney.addCredit(wireDetailsEvent.getAmt());
+			riskMonitorMoney.calculate();
 		} else {
 			tempMonitor.setCreditAmt(-1);
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
@@ -103,6 +105,8 @@ public class WireDetailsEventsService {
 				tempMonitor.setStatus("Released");
 				rM.addDebit(wireDetailsEvent.getAmt());
 				rM.calculate();
+				riskMonitorMoney.addDebit(wireDetailsEvent.getAmt());
+				riskMonitorMoney.calculate();
 			}
 		}
 		tempMonitor.setPmtRail(wireDetailsEvent.getPmtRail());
@@ -113,9 +117,6 @@ public class WireDetailsEventsService {
 		log.info("rM : " + rM);
 		log.info("riskMonitorMoney : " + riskMonitorMoney);
 		c1.update(riskMonitorMoney);
-
-//		c1.update(rM);
-		// c1.update(riskMonitorMoney);
 
 		log.info(c1.toString());
 		return c1;
