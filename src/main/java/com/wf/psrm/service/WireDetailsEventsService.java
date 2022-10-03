@@ -90,14 +90,14 @@ public class WireDetailsEventsService {
 				if (wireDetailsEvent.getNm().equalsIgnoreCase("CITI")) {
 					list.add("Transaction for CITI are kept on hold");
 				}
-				if (wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
-					list.add("All retail trasanctions kept on hold");
+				if(wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
+					list.add("All retail transactions kept on hold");
 				}
-				if (tempMonitor.getDebitAmt() > dynamicAmount) {
-					list.add("Debit Amount is greater than Threshold");
+				if(tempMonitor.getDebitAmt() > dynamicAmount) {
+					list.add("Debit Amount is greater than Threshold, $"+dynamicAmount);
 				}
 				if (tempMonitor.getDebitAmt() > (tempMonitor.getMaxAvailable() * throttleMaxAvailable)) {
-					list.add("Debit Amount is greater than Max Available %age");
+					list.add("Debit Amount is greater than Max Available "+throttleMaxAvailable+"%");
 				}
 				tempMonitor.setReasonForHold(list.toString());
 				log.info(tempMonitor.getReasonForHold());
