@@ -60,10 +60,10 @@ public class PsrmController {
 	}
 	
 	@CrossOrigin
-	@PostMapping("/v1/psrm/throttleCurrentPosition")
-	public ResponseEntity<Optional<?>> postthrottleCurrentPosition(@RequestParam Float throttleCurrentPosition) {
-		Float tempThrottleCurrentPosition = wireDetailsEventsService.setThrottleCurrentPosition(throttleCurrentPosition);
-		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempThrottleCurrentPosition));
+	@PostMapping("/v1/psrm/throttleMaxAvailable")
+	public ResponseEntity<Optional<?>> postThrottleMaxAvailable(@RequestParam Float throttleMaxAvailable) {
+		Float tempThrottleMaxAvailable = wireDetailsEventsService.setThrottleMaxAvailable(throttleMaxAvailable);
+		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempThrottleMaxAvailable));
 	}
 
 }

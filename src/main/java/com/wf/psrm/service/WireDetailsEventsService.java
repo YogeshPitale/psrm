@@ -55,7 +55,7 @@ public class WireDetailsEventsService {
 
 	private static Boolean throttleValue = false;
 
-	private static Float throttleCurrentPosition = (float) 0.3;
+	private static float throttleMaxAvailable = (float) 0.3;
 
 //	RiskMonitorMoney riskMonitorMoney;
 
@@ -82,8 +82,7 @@ public class WireDetailsEventsService {
 			if (throttleValue || wireDetailsEvent.getNm().equalsIgnoreCase("CITI")
 					|| wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")
 					|| tempMonitor.getDebitAmt() > dynamicAmount
-//					|| tempMonitor.getDebitAmt() > (tempMonitor.getCurrentPosition() * throttleCurrentPosition)
-			) {
+					|| tempMonitor.getDebitAmt() > (rM.getMaxAvailable() * throttleMaxAvailable)) {
 				List<String> list = new ArrayList<String>();
 				if (throttleValue) {
 					list.add("Throttling is On");
@@ -97,8 +96,8 @@ public class WireDetailsEventsService {
 				if (tempMonitor.getDebitAmt() > dynamicAmount) {
 					list.add("Debit Amount is greater than Threshold");
 				}
-				if (tempMonitor.getDebitAmt() > (tempMonitor.getCurrentPosition() * throttleCurrentPosition)) {
-					list.add("Debit Amount is greater than Threshold %age");
+				if (tempMonitor.getDebitAmt() > (tempMonitor.getMaxAvailable() * throttleMaxAvailable)) {
+					list.add("Debit Amount is greater than Max Available %age");
 				}
 				tempMonitor.setReasonForHold(list.toString());
 				log.info(tempMonitor.getReasonForHold());
@@ -168,6 +167,7 @@ public class WireDetailsEventsService {
 		c1.setCap(cap);
 		c1.setInitialBalance(initialBalance);
 		rM = new RiskMonitor(c1);
+		rM.calculate();
 		log.info("RiskMonitor initialize to cap:" + cap + " Initial balance" + initialBalance);
 		// riskMonitorMoney = new RiskMonitorMoney(c1);
 	}
@@ -197,9 +197,9 @@ public class WireDetailsEventsService {
 		return WireDetailsEventsService.dynamicAmount;
 	}
 
-	public Float setThrottleCurrentPosition(Float throttleCurrentPosition) {
-		WireDetailsEventsService.throttleCurrentPosition = throttleCurrentPosition / 100;
-		log.info("throttleCurrentPosition: " + WireDetailsEventsService.throttleCurrentPosition);
-		return WireDetailsEventsService.throttleCurrentPosition;
+	public Float setThrottleMaxAvailable(Float throttleMaxAvailable) {
+		WireDetailsEventsService.throttleMaxAvailable = throttleMaxAvailable / 100;
+		log.info("throttleMaxAvailable: " + WireDetailsEventsService.throttleMaxAvailable);
+		return WireDetailsEventsService.throttleMaxAvailable;
 	}
 }
