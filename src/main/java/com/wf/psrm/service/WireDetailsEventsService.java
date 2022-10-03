@@ -55,6 +55,8 @@ public class WireDetailsEventsService {
 
 	private static Boolean throttleValue = false;
 
+	private static Float throttleCurrentPosition = (float) 0.3;
+
 //	RiskMonitorMoney riskMonitorMoney;
 
 	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
@@ -78,19 +80,25 @@ public class WireDetailsEventsService {
 			tempMonitor.setCreditAmt(-1);
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
 			if (throttleValue || wireDetailsEvent.getNm().equalsIgnoreCase("CITI")
-					|| wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL") || tempMonitor.getDebitAmt() > dynamicAmount) {
+					|| wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")
+					|| tempMonitor.getDebitAmt() > dynamicAmount
+//					|| tempMonitor.getDebitAmt() > (tempMonitor.getCurrentPosition() * throttleCurrentPosition)
+			) {
 				List<String> list = new ArrayList<String>();
-				if(throttleValue) {
+				if (throttleValue) {
 					list.add("Throttling is On");
-				}  
-				if(wireDetailsEvent.getNm().equalsIgnoreCase("CITI")) {
+				}
+				if (wireDetailsEvent.getNm().equalsIgnoreCase("CITI")) {
 					list.add("Transaction for CITI are kept on hold");
 				}
-				if(wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
+				if (wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
 					list.add("All retail trasanctions kept on hold");
 				}
-				if(tempMonitor.getDebitAmt() > dynamicAmount) {
+				if (tempMonitor.getDebitAmt() > dynamicAmount) {
 					list.add("Debit Amount is greater than Threshold");
+				}
+				if (tempMonitor.getDebitAmt() > (tempMonitor.getCurrentPosition() * throttleCurrentPosition)) {
+					list.add("Debit Amount is greater than Threshold %age");
 				}
 				tempMonitor.setReasonForHold(list.toString());
 				log.info(tempMonitor.getReasonForHold());
@@ -187,5 +195,11 @@ public class WireDetailsEventsService {
 		WireDetailsEventsService.dynamicAmount = amount;
 		log.info("dynamicAmount: " + WireDetailsEventsService.dynamicAmount);
 		return WireDetailsEventsService.dynamicAmount;
+	}
+
+	public Float setThrottleCurrentPosition(Float throttleCurrentPosition) {
+		WireDetailsEventsService.throttleCurrentPosition = throttleCurrentPosition / 100;
+		log.info("throttleCurrentPosition: " + WireDetailsEventsService.throttleCurrentPosition);
+		return WireDetailsEventsService.throttleCurrentPosition;
 	}
 }

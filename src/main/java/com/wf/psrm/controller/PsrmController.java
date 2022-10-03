@@ -58,5 +58,12 @@ public class PsrmController {
 		Integer tempAmount = wireDetailsEventsService.setAmount(amount);
 		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempAmount));
 	}
+	
+	@CrossOrigin
+	@PostMapping("/v1/psrm/throttleCurrentPosition")
+	public ResponseEntity<Optional<?>> postthrottleCurrentPosition(@RequestParam Float throttleCurrentPosition) {
+		Float tempThrottleCurrentPosition = wireDetailsEventsService.setThrottleCurrentPosition(throttleCurrentPosition);
+		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempThrottleCurrentPosition));
+	}
 
 }
