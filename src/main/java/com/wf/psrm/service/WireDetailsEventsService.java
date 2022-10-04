@@ -97,7 +97,7 @@ public class WireDetailsEventsService {
 					list.add("All retail transactions kept on hold");
 				}
 				if(tempMonitor.getDebitAmt() > dynamicAmount) {
-					list.add("Debit Amount is greater than Threshold, $"+dynamicAmount);
+					list.add("Debit Amount is greater than Threshold: $"+dynamicAmount);
 				}
 				if (tempMonitor.getDebitAmt() > (tempMonitor.getMaxAvailable() * throttleMaxAvailable)) {
 					list.add("Debit Amount is greater than Max Available "+throttleMaxAvailable+"%");
