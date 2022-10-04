@@ -58,5 +58,12 @@ public class PsrmController {
 		Integer tempAmount = wireDetailsEventsService.setAmount(amount);
 		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempAmount));
 	}
+	
+	@CrossOrigin
+	@PostMapping("/v1/psrm/throttleMaxAvailable")
+	public ResponseEntity<Optional<?>> postThrottleMaxAvailable(@RequestParam Float throttleMaxAvailable) {
+		Float tempThrottleMaxAvailable = wireDetailsEventsService.setThrottleMaxAvailable(throttleMaxAvailable);
+		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempThrottleMaxAvailable));
+	}
 
 }

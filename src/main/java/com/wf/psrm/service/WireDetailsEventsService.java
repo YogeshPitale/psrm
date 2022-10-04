@@ -58,6 +58,8 @@ public class WireDetailsEventsService {
 
 	private static Boolean throttleValue = false;
 
+	private static float throttleMaxAvailable = (float) 0.3;
+
 	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
 			throws IOException {
 
@@ -82,7 +84,8 @@ public class WireDetailsEventsService {
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
 			if (throttleValue || wireDetailsEvent.getNm().equalsIgnoreCase("CITI")
 					|| wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")
-					|| tempMonitor.getDebitAmt() > dynamicAmount) {
+					|| tempMonitor.getDebitAmt() > dynamicAmount
+					|| tempMonitor.getDebitAmt() > (rM.getMaxAvailable() * throttleMaxAvailable)) {
 				List<String> list = new ArrayList<String>();
 				if (throttleValue) {
 					list.add("Throttling is On");
@@ -90,11 +93,14 @@ public class WireDetailsEventsService {
 				if (wireDetailsEvent.getNm().equalsIgnoreCase("CITI")) {
 					list.add("Transaction for CITI are kept on hold");
 				}
-				if (wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
-					list.add("All retail trasanctions kept on hold");
+				if(wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
+					list.add("All retail transactions kept on hold");
 				}
-				if (tempMonitor.getDebitAmt() > dynamicAmount) {
-					list.add("Debit Amount is greater than Threshold");
+				if(tempMonitor.getDebitAmt() > dynamicAmount) {
+					list.add("Debit Amount is greater than Threshold, $"+dynamicAmount);
+				}
+				if (tempMonitor.getDebitAmt() > (tempMonitor.getMaxAvailable() * throttleMaxAvailable)) {
+					list.add("Debit Amount is greater than Max Available "+throttleMaxAvailable+"%");
 				}
 				tempMonitor.setReasonForHold(list.toString());
 				log.info(tempMonitor.getReasonForHold());
@@ -170,7 +176,7 @@ public class WireDetailsEventsService {
 		c1.setInitialBalance(initialBalance);
 		rM = new RiskMonitor(c1);
 		riskMonitorMoney = new RiskMonitorMoney(c1);
-
+		rM.calculate();
 		log.info("RiskMonitor initialize to cap:" + cap + " Initial balance" + initialBalance);
 		// riskMonitorMoney = new RiskMonitorMoney(c1);
 
@@ -199,5 +205,11 @@ public class WireDetailsEventsService {
 		WireDetailsEventsService.dynamicAmount = amount;
 		log.info("dynamicAmount: " + WireDetailsEventsService.dynamicAmount);
 		return WireDetailsEventsService.dynamicAmount;
+	}
+
+	public Float setThrottleMaxAvailable(Float throttleMaxAvailable) {
+		WireDetailsEventsService.throttleMaxAvailable = throttleMaxAvailable / 100;
+		log.info("throttleMaxAvailable: " + WireDetailsEventsService.throttleMaxAvailable);
+		return WireDetailsEventsService.throttleMaxAvailable;
 	}
 }
