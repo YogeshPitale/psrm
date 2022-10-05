@@ -3,24 +3,17 @@ package com.wf.psrm.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 //import com.wf.psrm.domain.RiskMonitorMoney;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.dao.RecoverableDataAccessException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wf.psrm.controller.PsrmController;
 import com.wf.psrm.domain.RiskMonitor;
 import com.wf.psrm.domain.RiskMonitorCalculator;
 import com.wf.psrm.domain.RiskMonitorMoney;
@@ -85,7 +78,7 @@ public class WireDetailsEventsService {
 			if (throttleValue || wireDetailsEvent.getNm().equalsIgnoreCase("CITI")
 					|| wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")
 					|| tempMonitor.getDebitAmt() > dynamicAmount
-					|| tempMonitor.getDebitAmt() > (rM.getMaxAvailable() * throttleMaxAvailable)) {
+					|| tempMonitor.getDebitAmt() > (rM.getCap() * throttleMaxAvailable)) {
 				List<String> list = new ArrayList<String>();
 				if (throttleValue) {
 					list.add("Throttling is On");
@@ -99,8 +92,8 @@ public class WireDetailsEventsService {
 				if(tempMonitor.getDebitAmt() > dynamicAmount) {
 					list.add("Debit Amount is greater than Threshold: $"+dynamicAmount);
 				}
-				if (tempMonitor.getDebitAmt() > (tempMonitor.getMaxAvailable() * throttleMaxAvailable)) {
-					list.add("Debit Amount is greater than Max Available "+throttleMaxAvailable+"%");
+				if (tempMonitor.getDebitAmt() > (rM.getCap() * throttleMaxAvailable)) {
+					list.add("Debit Amount is greater than "+throttleMaxAvailable+"% of Cap");
 				}
 				tempMonitor.setReasonForHold(list.toString());
 				log.info(tempMonitor.getReasonForHold());
@@ -211,5 +204,13 @@ public class WireDetailsEventsService {
 		WireDetailsEventsService.throttleMaxAvailable = throttleMaxAvailable / 100;
 		log.info("throttleMaxAvailable: " + WireDetailsEventsService.throttleMaxAvailable);
 		return WireDetailsEventsService.throttleMaxAvailable;
+	}
+
+	public void reset() {
+		riskMonitorRepository.deleteAll();
+		c1=new RiskMonitorCalculator();
+		dynamicAmount = 800000;
+		throttleValue = false;
+		throttleMaxAvailable = (float) 0.3;
 	}
 }

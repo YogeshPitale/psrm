@@ -39,23 +39,25 @@ public class RiskMonitorMoney {
 		this.initialBalance = Money.of(usd,calculator.getInitialBalance());
 		this.fedwireCredits = Money.parse("USD 0");
 		this.fedwireDebits = Money.parse("USD 0");
+		netFedWirePosition = Money.parse("USD 0");
 		this.cap = Money.of(usd,calculator.getCap());
-	//	this.currentPosition = calculator.getCurrentPosition();
+		this.currentPosition = initialBalance;
 		this.safetyfactor = cap.multipliedBy(0.1,RoundingMode.HALF_UP);
+		this.maxAvailable = cap.minus(safetyfactor);
 	}
 
-	public RiskMonitorMoney calculate() {
+	public synchronized RiskMonitorMoney calculate() {
 		netFedWirePosition = fedwireCredits.minus(fedwireDebits);
 		currentPosition = initialBalance.plus(netFedWirePosition);
 		maxAvailable = (currentPosition.plus(cap)).minus(safetyfactor);
 		return this;
 	}
 
-	public void addCredit(double amt) {
+	public synchronized void addCredit(double amt) {
 		fedwireCredits = fedwireCredits.plus(amt);
 	}
 
-	public void addDebit(double amt) {
+	public synchronized void addDebit(double amt) {
 		fedwireDebits =fedwireDebits.plus(amt);
 	}
 }

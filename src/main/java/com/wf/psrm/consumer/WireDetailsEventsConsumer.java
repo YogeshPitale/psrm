@@ -36,13 +36,16 @@ public class WireDetailsEventsConsumer {
 	@KafkaListener(topics = { "events" })
 	public void onMessage(ConsumerRecord<String, String> consumerRecord) throws IOException {
 
-		log.info("ConsumerRecord : {} ", consumerRecord);
-		latestRISKInstance = wireDetailsEventsService.processWireDetailsEvent(consumerRecord);
-		WireDetailsEvent wireDetailsEvent = objectMapper.readValue(consumerRecord.value(), WireDetailsEvent.class);
-
-		latestRISKInstance.setTimeStamp(wireDetailsEvent.getEvtDtTm());
-
-		emitter.send(latestRISKInstance);
+		try {
+			log.info("ConsumerRecord : {} ", consumerRecord);
+			latestRISKInstance = wireDetailsEventsService.processWireDetailsEvent(consumerRecord);
+			WireDetailsEvent wireDetailsEvent = objectMapper.readValue(consumerRecord.value(), WireDetailsEvent.class);
+			latestRISKInstance.setTimeStamp(wireDetailsEvent.getEvtDtTm());
+			emitter.send(latestRISKInstance);
+			log.info("Sent latestRisk Instance to UI with current position"+latestRISKInstance.getCurrentPosition());
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	@GetMapping("/emitter")

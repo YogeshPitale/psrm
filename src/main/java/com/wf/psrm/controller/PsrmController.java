@@ -40,6 +40,13 @@ public class PsrmController {
 	}
 
 	@CrossOrigin
+	@PostMapping("/v1/psrm/reset")
+	public ResponseEntity<Optional<?>> reset() {
+		wireDetailsEventsService.reset();
+		return ResponseEntity.status(HttpStatus.OK).body(Optional.of("success"));
+	}
+
+	@CrossOrigin
 	@GetMapping("/v1/psrm/count")
 	public int getCount() {
 		return wireDetailsEventsService.getCount();
