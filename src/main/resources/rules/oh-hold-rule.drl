@@ -1,0 +1,11 @@
+import com.wf.psrm.domain.CustomRules;
+global com.wf.psrm.domain.RulesList rulesList;
+
+dialect "mvel"
+
+rule "On Hold based rule"
+	when
+		CustomRules(throttleValue || nm=="CITI" || pmtRail=="RTL" || throttleValue || debitAmt > dynamicAmount || debitAmt > (cap*throttleMaxAvailable))
+	then
+		rulesList.setStatusOnHold(true)
+end

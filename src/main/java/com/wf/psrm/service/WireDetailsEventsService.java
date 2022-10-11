@@ -6,6 +6,8 @@ import java.util.List;
 
 //import com.wf.psrm.domain.RiskMonitorMoney;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.kie.api.runtime.KieContainer;
+import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -14,9 +16,11 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wf.psrm.domain.CustomRules;
 import com.wf.psrm.domain.RiskMonitor;
 import com.wf.psrm.domain.RiskMonitorCalculator;
 import com.wf.psrm.domain.RiskMonitorMoney;
+import com.wf.psrm.domain.RulesList;
 import com.wf.psrm.domain.WireDetailsEvent;
 import com.wf.psrm.jpa.RiskMonitorRepository;
 import com.wf.psrm.jpa.WireDetailsEventsRepository;
@@ -53,6 +57,9 @@ public class WireDetailsEventsService {
 
 	private static float throttleMaxAvailable = (float) 0.3;
 
+	@Autowired
+	private KieContainer kieContainer;
+
 	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
 			throws IOException {
 
@@ -75,27 +82,11 @@ public class WireDetailsEventsService {
 		} else {
 			tempMonitor.setCreditAmt(-1);
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
-			if (throttleValue || wireDetailsEvent.getNm().equalsIgnoreCase("CITI")
-					|| wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")
-					|| tempMonitor.getDebitAmt() > dynamicAmount
-					|| tempMonitor.getDebitAmt() > (rM.getCap() * throttleMaxAvailable)) {
-				List<String> list = new ArrayList<String>();
-				if (throttleValue) {
-					list.add("Throttling is On");
-				}
-				if (wireDetailsEvent.getNm().equalsIgnoreCase("CITI")) {
-					list.add("Transaction for CITI are kept on hold");
-				}
-				if(wireDetailsEvent.getPmtRail().equalsIgnoreCase("RTL")) {
-					list.add("All retail transactions kept on hold");
-				}
-				if(tempMonitor.getDebitAmt() > dynamicAmount) {
-					list.add("Debit Amount is greater than Threshold: $"+dynamicAmount);
-				}
-				if (tempMonitor.getDebitAmt() > (rM.getCap() * throttleMaxAvailable)) {
-					list.add("Debit Amount is greater than "+throttleMaxAvailable+"% of Cap");
-				}
-				tempMonitor.setReasonForHold(list.toString());
+			CustomRules customRules = new CustomRules(wireDetailsEvent.getNm(), wireDetailsEvent.getPmtRail(),
+					throttleValue, dynamicAmount, throttleMaxAvailable, tempMonitor.getDebitAmt(), rM.getCap());
+			RulesList rulesList = getList(customRules);
+			if (rulesList.getStatusOnHold()) {
+				tempMonitor.setReasonForHold(rulesList.getList().toString());
 				log.info(tempMonitor.getReasonForHold());
 				tempMonitor.setStatus("On Hold");
 				rM.setOnHoldCount();
@@ -208,9 +199,19 @@ public class WireDetailsEventsService {
 
 	public void reset() {
 		riskMonitorRepository.deleteAll();
-		c1=new RiskMonitorCalculator();
+		c1 = new RiskMonitorCalculator();
 		dynamicAmount = 800000;
 		throttleValue = false;
 		throttleMaxAvailable = (float) 0.3;
+	}
+
+	public RulesList getList(CustomRules cRules) {
+		RulesList rulesList = new RulesList();
+		KieSession kieSession = kieContainer.newKieSession();
+		kieSession.setGlobal("rulesList", rulesList);
+		kieSession.insert(cRules);
+		kieSession.fireAllRules();
+		kieSession.dispose();
+		return rulesList;
 	}
 }
