@@ -8,7 +8,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class WireDetailsEventsConsumerManualOffset implements AcknowledgingMessageListener<String, String>{
+public class WireDetailsEventsConsumerManualOffset implements AcknowledgingMessageListener<String, String> {
 	@Override
 	@KafkaListener(topics = { "events" })
 	public void onMessage(ConsumerRecord<String, String> consumerRecord, Acknowledgment acknowledgment) {

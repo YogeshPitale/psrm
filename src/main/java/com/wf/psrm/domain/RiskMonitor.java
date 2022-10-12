@@ -50,7 +50,6 @@ public class RiskMonitor {
 		this.onHoldCount = 0;
 	}
 
-
 	public synchronized RiskMonitor calculate() {
 		netFedWirePosition = round(fedwireCredits - fedwireDebits, 2);
 		currentPosition = round(initialBalance + netFedWirePosition, 2);
@@ -76,7 +75,6 @@ public class RiskMonitor {
 
 	public RiskMonitor(RiskMonitor rM) {
 		super();
-		RiskMonitor newInstance = new RiskMonitor();
 		this.initialBalance = rM.initialBalance;
 		this.fedwireCredits = rM.fedwireCredits;
 		this.fedwireDebits = rM.fedwireDebits;

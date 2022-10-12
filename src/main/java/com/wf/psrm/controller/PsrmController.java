@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.wf.psrm.domain.RiskMonitorCalculator;
 import com.wf.psrm.domain.RiskMonitor;
 
 @RestController
@@ -65,12 +64,11 @@ public class PsrmController {
 		Integer tempAmount = wireDetailsEventsService.setAmount(amount);
 		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempAmount));
 	}
-	
+
 	@CrossOrigin
 	@PostMapping("/v1/psrm/throttleMaxAvailable")
 	public ResponseEntity<Optional<?>> postThrottleMaxAvailable(@RequestParam Float throttleMaxAvailable) {
 		Float tempThrottleMaxAvailable = wireDetailsEventsService.setThrottleMaxAvailable(throttleMaxAvailable);
 		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempThrottleMaxAvailable));
 	}
-
 }

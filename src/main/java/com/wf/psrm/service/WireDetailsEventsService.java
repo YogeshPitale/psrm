@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-//import com.wf.psrm.domain.RiskMonitorMoney;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,7 @@ import com.wf.psrm.domain.RulesList;
 import com.wf.psrm.domain.WireDetailsEvent;
 import com.wf.psrm.jpa.RiskMonitorRepository;
 import com.wf.psrm.jpa.WireDetailsEventsRepository;
+import com.wf.psrm.util.FeignServiceUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,8 +58,11 @@ public class WireDetailsEventsService {
 
 	private static float throttleMaxAvailable = (float) 0.3;
 
+//	@Autowired
+//	private KieContainer kieContainer;
+
 	@Autowired
-	private KieContainer kieContainer;
+	private FeignServiceUtil feignServiceUtil;
 
 	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
 			throws IOException {
@@ -82,9 +86,17 @@ public class WireDetailsEventsService {
 		} else {
 			tempMonitor.setCreditAmt(-1);
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
+
 			CustomRules customRules = new CustomRules(wireDetailsEvent.getNm(), wireDetailsEvent.getPmtRail(),
 					throttleValue, dynamicAmount, throttleMaxAvailable, tempMonitor.getDebitAmt(), rM.getCap());
-			RulesList rulesList = getList(customRules);
+//			RulesList rulesList = getList(customRules);
+
+			ResponseEntity<Object> responseEntity = feignServiceUtil.getRulesList(customRules);
+
+			ObjectMapper mapper = new ObjectMapper();
+			RulesList rulesList = mapper.readValue(mapper.writeValueAsString(responseEntity.getBody()),
+					RulesList.class);
+
 			if (rulesList.getStatusOnHold()) {
 				tempMonitor.setReasonForHold(rulesList.getList().toString());
 				log.info(tempMonitor.getReasonForHold());
@@ -205,13 +217,13 @@ public class WireDetailsEventsService {
 		throttleMaxAvailable = (float) 0.3;
 	}
 
-	public RulesList getList(CustomRules cRules) {
-		RulesList rulesList = new RulesList();
-		KieSession kieSession = kieContainer.newKieSession();
-		kieSession.setGlobal("rulesList", rulesList);
-		kieSession.insert(cRules);
-		kieSession.fireAllRules();
-		kieSession.dispose();
-		return rulesList;
-	}
+//	public RulesList getList(CustomRules cRules) {
+//		RulesList rulesList = new RulesList();
+//		KieSession kieSession = kieContainer.newKieSession();
+//		kieSession.setGlobal("rulesList", rulesList);
+//		kieSession.insert(cRules);
+//		kieSession.fireAllRules();
+//		kieSession.dispose();
+//		return rulesList;
+//	}
 }

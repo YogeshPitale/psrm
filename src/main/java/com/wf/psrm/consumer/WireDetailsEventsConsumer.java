@@ -42,8 +42,8 @@ public class WireDetailsEventsConsumer {
 			WireDetailsEvent wireDetailsEvent = objectMapper.readValue(consumerRecord.value(), WireDetailsEvent.class);
 			latestRISKInstance.setTimeStamp(wireDetailsEvent.getEvtDtTm());
 			emitter.send(latestRISKInstance);
-			log.info("Sent latestRisk Instance to UI with current position"+latestRISKInstance.getCurrentPosition());
-		}catch (Exception e){
+			log.info("Sent latestRisk Instance to UI with current position" + latestRISKInstance.getCurrentPosition());
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

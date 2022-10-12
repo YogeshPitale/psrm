@@ -11,7 +11,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @AllArgsConstructor
@@ -36,13 +35,13 @@ public class RiskMonitorMoney {
 
 	public RiskMonitorMoney(RiskMonitorCalculator calculator) {
 
-		this.initialBalance = Money.of(usd,calculator.getInitialBalance());
+		this.initialBalance = Money.of(usd, calculator.getInitialBalance());
 		this.fedwireCredits = Money.parse("USD 0");
 		this.fedwireDebits = Money.parse("USD 0");
 		netFedWirePosition = Money.parse("USD 0");
-		this.cap = Money.of(usd,calculator.getCap());
+		this.cap = Money.of(usd, calculator.getCap());
 		this.currentPosition = initialBalance;
-		this.safetyfactor = cap.multipliedBy(0.1,RoundingMode.HALF_UP);
+		this.safetyfactor = cap.multipliedBy(0.1, RoundingMode.HALF_UP);
 		this.maxAvailable = cap.minus(safetyfactor);
 	}
 
@@ -58,6 +57,6 @@ public class RiskMonitorMoney {
 	}
 
 	public synchronized void addDebit(double amt) {
-		fedwireDebits =fedwireDebits.plus(amt);
+		fedwireDebits = fedwireDebits.plus(amt);
 	}
 }

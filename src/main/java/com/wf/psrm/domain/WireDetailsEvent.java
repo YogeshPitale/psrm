@@ -17,11 +17,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 public class WireDetailsEvent {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	
+
 	private String appId;
 
 	private String pmtRail;
@@ -37,7 +37,7 @@ public class WireDetailsEvent {
 	private String nm;
 
 	private String evtDtTm;
-	
+
 //	@DecimalMin(value = "0.1", inclusive = true)
 //	private Double initialBalance;
 
