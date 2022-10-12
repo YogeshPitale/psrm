@@ -13,7 +13,7 @@ spring:
       bootstrap-servers: localhost:9092
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      group-id: library-events-listener-group
+      group-id: events-listener-group
     producer:
       bootstrap-servers:
         -   localhost:9092
@@ -57,7 +57,7 @@ spring:
       bootstrap-servers: localhost:9092
       key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      group-id: library-events-listener-group
+      group-id: events-listener-group
   config:
     activate:
       on-profile: prod

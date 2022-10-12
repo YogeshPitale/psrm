@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: psrm-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: psrm
+  template:
+    metadata:
+      labels:
+        component: psrm
+    spec:
+      containers:
+        - name: psrm
+          image: yogeshpitale/psrm
+          ports:
+            - containerPort: 8091
