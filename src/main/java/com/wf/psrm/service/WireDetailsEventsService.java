@@ -63,6 +63,9 @@ public class WireDetailsEventsService {
 
 	@Autowired
 	private FeignServiceUtil feignServiceUtil;
+	
+	@Autowired
+	private SequenceGeneratorService sequenceGenerator;
 
 	public RiskMonitorCalculator processWireDetailsEvent(ConsumerRecord<String, String> consumerRecord)
 			throws IOException {
@@ -70,9 +73,12 @@ public class WireDetailsEventsService {
 		WireDetailsEvent wireDetailsEvent = objectMapper.readValue(consumerRecord.value(), WireDetailsEvent.class);
 		log.info("wireDetailsEvent : {} ", wireDetailsEvent);
 
+
+		wireDetailsEvent.setId(sequenceGenerator.generateSequence(WireDetailsEvent.SEQUENCE_NAME));
 		save(wireDetailsEvent);
 
 		RiskMonitor tempMonitor = new RiskMonitor(rM);
+		tempMonitor.setId(wireDetailsEvent.getId());
 		tempMonitor.setTimeStamp(wireDetailsEvent.getEvtDtTm());
 		tempMonitor.setNm(wireDetailsEvent.getNm());
 		if (wireDetailsEvent.getPayeeiswells().equals("Y") && wireDetailsEvent.getPayoriswells().equals("N")) {

@@ -61,3 +61,12 @@ spring:
   config:
     activate:
       on-profile: prod
+
+---
+
+spring:
+  data:
+    mongodb:
+      database: MyDB
+      port: '27017'
+      host: localhost

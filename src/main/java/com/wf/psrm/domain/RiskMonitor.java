@@ -1,9 +1,8 @@
 package com.wf.psrm.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,12 +15,11 @@ import java.math.RoundingMode;
 @NoArgsConstructor
 @Data
 @Builder
-@Entity
+@Document(collection="riskmonitor")
 public class RiskMonitor {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private Long id;
 	private double initialBalance;
 	private double fedwireCredits;
 	private double fedwireDebits;

@@ -1,8 +1,7 @@
 package com.wf.psrm.jpa;
 
-import org.springframework.data.repository.CrudRepository;
-
+import org.springframework.data.mongodb.repository.MongoRepository;
 import com.wf.psrm.domain.WireDetailsEvent;
 
-public interface WireDetailsEventsRepository extends CrudRepository<WireDetailsEvent, String> {
+public interface WireDetailsEventsRepository extends MongoRepository<WireDetailsEvent, Long> {
 }
