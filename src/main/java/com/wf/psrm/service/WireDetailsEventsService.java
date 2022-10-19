@@ -1,12 +1,9 @@
 package com.wf.psrm.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.kie.api.runtime.KieContainer;
-import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -16,11 +13,11 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wf.psrm.domain.CustomRules;
+import com.wf.psrm.domain.TransactionDetails;
 import com.wf.psrm.domain.RiskMonitor;
 import com.wf.psrm.domain.RiskMonitorCalculator;
 import com.wf.psrm.domain.RiskMonitorMoney;
-import com.wf.psrm.domain.RulesList;
+import com.wf.psrm.domain.TransactionStatus;
 import com.wf.psrm.domain.WireDetailsEvent;
 import com.wf.psrm.jpa.RiskMonitorRepository;
 import com.wf.psrm.jpa.WireDetailsEventsRepository;
@@ -87,18 +84,18 @@ public class WireDetailsEventsService {
 			tempMonitor.setCreditAmt(-1);
 			tempMonitor.setDebitAmt(wireDetailsEvent.getAmt());
 
-			CustomRules customRules = new CustomRules(wireDetailsEvent.getNm(), wireDetailsEvent.getPmtRail(),
+			TransactionDetails transactionDetails = new TransactionDetails(wireDetailsEvent.getNm(), wireDetailsEvent.getPmtRail(),
 					throttleValue, dynamicAmount, throttleMaxAvailable, tempMonitor.getDebitAmt(), rM.getCap());
 //			RulesList rulesList = getList(customRules);
 
-			ResponseEntity<Object> responseEntity = feignServiceUtil.getRulesList(customRules);
+			ResponseEntity<Object> responseEntity = feignServiceUtil.getTransactionStatus(transactionDetails);
 
 			ObjectMapper mapper = new ObjectMapper();
-			RulesList rulesList = mapper.readValue(mapper.writeValueAsString(responseEntity.getBody()),
-					RulesList.class);
+			TransactionStatus transactionStatus = mapper.readValue(mapper.writeValueAsString(responseEntity.getBody()),
+					TransactionStatus.class);
 
-			if (rulesList.getStatusOnHold()) {
-				tempMonitor.setReasonForHold(rulesList.getList().toString());
+			if (transactionStatus.getStatusOnHold()) {
+				tempMonitor.setReasonForHold(transactionStatus.getOnHoldReasonsList().toString());
 				log.info(tempMonitor.getReasonForHold());
 				tempMonitor.setStatus("On Hold");
 				rM.setOnHoldCount();

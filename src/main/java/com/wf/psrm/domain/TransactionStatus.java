@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import lombok.Data;
 
 @Data
-public class RulesList {
+public class TransactionStatus {
 	private Boolean statusOnHold;
-	private ArrayList<String> list;
+	private ArrayList<String> onHoldReasonsList;
 }

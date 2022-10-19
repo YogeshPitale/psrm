@@ -7,7 +7,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class CustomRules {
+public class TransactionDetails {
 	private String nm;
 	private String pmtRail;
 	private Boolean throttleValue;
