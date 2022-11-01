@@ -15,7 +15,7 @@ import com.wf.psrm.domain.DatabaseSequence;
 
 @Service
 public class SequenceGeneratorService {
-	
+
 	private MongoOperations mongoOperations;
 
 	@Autowired

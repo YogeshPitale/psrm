@@ -10,19 +10,19 @@ import com.wf.psrm.service.SequenceGeneratorService;
 
 @Component
 public class UserModelListener extends AbstractMongoEventListener<WireDetailsEvent> {
-	
+
 	private SequenceGeneratorService sequenceGenerator;
 
-    @Autowired
-    public UserModelListener(SequenceGeneratorService sequenceGenerator) {
-        this.sequenceGenerator = sequenceGenerator;
-    }
+	@Autowired
+	public UserModelListener(SequenceGeneratorService sequenceGenerator) {
+		this.sequenceGenerator = sequenceGenerator;
+	}
 
-    @Override
-    public void onBeforeConvert(BeforeConvertEvent<WireDetailsEvent> event) {
-        if (event.getSource().getId() < 1) {
-            event.getSource().setId(sequenceGenerator.generateSequence(WireDetailsEvent.SEQUENCE_NAME));
-        }
-    }
+	@Override
+	public void onBeforeConvert(BeforeConvertEvent<WireDetailsEvent> event) {
+		if (event.getSource().getId() < 1) {
+			event.getSource().setId(sequenceGenerator.generateSequence(WireDetailsEvent.SEQUENCE_NAME));
+		}
+	}
 
 }

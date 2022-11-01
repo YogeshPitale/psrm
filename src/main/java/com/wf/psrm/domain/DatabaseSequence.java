@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Document(collection = "database_sequences")
 public class DatabaseSequence {
-	
+
 	@Id
 	private String id;
 

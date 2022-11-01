@@ -31,7 +31,7 @@ public class WireDetailsEventsConsumer {
 	@Autowired
 	ObjectMapper objectMapper;
 
-	SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+//	SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
 
 	@KafkaListener(topics = { "events" })
 	public void onMessage(ConsumerRecord<String, String> consumerRecord) throws IOException {
@@ -41,19 +41,19 @@ public class WireDetailsEventsConsumer {
 			latestRISKInstance = wireDetailsEventsService.processWireDetailsEvent(consumerRecord);
 			WireDetailsEvent wireDetailsEvent = objectMapper.readValue(consumerRecord.value(), WireDetailsEvent.class);
 			latestRISKInstance.setTimeStamp(wireDetailsEvent.getEvtDtTm());
-			emitter.send(latestRISKInstance);
+//			emitter.send(latestRISKInstance);
 			log.info("Sent latestRisk Instance to UI with current position" + latestRISKInstance.getCurrentPosition());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	@GetMapping("/emitter")
-	public SseEmitter eventEmitter() throws IOException, InterruptedException {
-
-		emitter.onTimeout(() -> {
-			emitter.complete();
-		});
-		return emitter;
-	}
+//	@GetMapping("/emitter")
+//	public SseEmitter eventEmitter() throws IOException, InterruptedException {
+//
+//		emitter.onTimeout(() -> {
+//			emitter.complete();
+//		});
+//		return emitter;
+//	}
 }

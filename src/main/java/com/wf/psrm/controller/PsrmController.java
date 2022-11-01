@@ -1,27 +1,39 @@
 package com.wf.psrm.controller;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import com.wf.psrm.service.WireDetailsEventsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.wf.psrm.domain.ReactiveRiskMonitor;
 import com.wf.psrm.domain.RiskMonitor;
+import com.wf.psrm.jpa.RiskMonitorReactiveRepository;
+import com.wf.psrm.service.WireDetailsEventsService;
+
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 public class PsrmController {
 
 	@Autowired
 	private WireDetailsEventsService wireDetailsEventsService;
+
+	@Autowired
+	private RiskMonitorReactiveRepository repository;
 
 	@PostMapping("/v1/psrm/account")
 	public ResponseEntity<Optional<?>> postEvent(@RequestParam HashMap<String, Double> req)
@@ -71,4 +83,12 @@ public class PsrmController {
 		Float tempThrottleMaxAvailable = wireDetailsEventsService.setThrottleMaxAvailable(throttleMaxAvailable);
 		return ResponseEntity.status(HttpStatus.OK).body(Optional.of(tempThrottleMaxAvailable));
 	}
+
+	@CrossOrigin
+	@GetMapping(value = "/v1/emitter", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+	public Flux<ReactiveRiskMonitor> getAllId() {
+		return repository.findByIdNotNull().repeatWhen(flux -> flux.delayElements(Duration.ofMillis(500)))
+				.subscribeOn(Schedulers.boundedElastic());
+	}
+
 }

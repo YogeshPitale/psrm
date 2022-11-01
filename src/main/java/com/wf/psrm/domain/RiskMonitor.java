@@ -15,7 +15,7 @@ import java.math.RoundingMode;
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection="riskmonitor")
+@Document
 public class RiskMonitor {
 
 	@Id

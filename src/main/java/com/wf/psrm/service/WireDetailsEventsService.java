@@ -17,11 +17,13 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wf.psrm.domain.CustomRules;
+import com.wf.psrm.domain.ReactiveRiskMonitor;
 import com.wf.psrm.domain.RiskMonitor;
 import com.wf.psrm.domain.RiskMonitorCalculator;
 import com.wf.psrm.domain.RiskMonitorMoney;
 import com.wf.psrm.domain.RulesList;
 import com.wf.psrm.domain.WireDetailsEvent;
+import com.wf.psrm.jpa.RiskMonitorReactiveRepository;
 import com.wf.psrm.jpa.RiskMonitorRepository;
 import com.wf.psrm.jpa.WireDetailsEventsRepository;
 import com.wf.psrm.util.FeignServiceUtil;
@@ -46,6 +48,9 @@ public class WireDetailsEventsService {
 	private RiskMonitorRepository riskMonitorRepository;
 
 	@Autowired
+	private RiskMonitorReactiveRepository reactiveRepository;
+
+	@Autowired
 	RiskMonitorCalculator c1;
 
 	RiskMonitor rM;
@@ -63,7 +68,7 @@ public class WireDetailsEventsService {
 
 	@Autowired
 	private FeignServiceUtil feignServiceUtil;
-	
+
 	@Autowired
 	private SequenceGeneratorService sequenceGenerator;
 
@@ -72,7 +77,6 @@ public class WireDetailsEventsService {
 
 		WireDetailsEvent wireDetailsEvent = objectMapper.readValue(consumerRecord.value(), WireDetailsEvent.class);
 		log.info("wireDetailsEvent : {} ", wireDetailsEvent);
-
 
 		wireDetailsEvent.setId(sequenceGenerator.generateSequence(WireDetailsEvent.SEQUENCE_NAME));
 		save(wireDetailsEvent);
@@ -118,7 +122,13 @@ public class WireDetailsEventsService {
 			}
 		}
 		tempMonitor.setPmtRail(wireDetailsEvent.getPmtRail());
+		tempMonitor.setTimeStamp(wireDetailsEvent.getEvtDtTm());
 		save(tempMonitor);
+
+//		ReactiveRiskMonitor reactiveRiskMonitor = new ReactiveRiskMonitor(tempMonitor);
+		ObjectMapper mapper = new ObjectMapper();
+		ReactiveRiskMonitor reactiveRiskMonitor = mapper.readValue(mapper.writeValueAsString(tempMonitor), ReactiveRiskMonitor.class);
+		save(reactiveRiskMonitor);
 //		save(rM);
 
 //		c1.update(rM);
@@ -131,13 +141,20 @@ public class WireDetailsEventsService {
 	}
 
 	private void save(RiskMonitor rM) {
+//		riskMonitorRepository.save(rM).subscribe(result -> log.info("RiskMonitor has been saved: {}", result));
 		riskMonitorRepository.save(rM);
 		log.info("Successfully Persisted the RiskMonitor {} ", rM);
 	}
 
 	private void save(WireDetailsEvent wireDetailsEvent) {
+//		wireDetailsEventsRepository.save(wireDetailsEvent).subscribe(result -> log.info("wireDetailsEvent has been saved: {}", result));
 		wireDetailsEventsRepository.save(wireDetailsEvent);
 		log.info("Successfully Persisted the Event {} ", wireDetailsEvent);
+	}
+
+	private void save(ReactiveRiskMonitor reactiveRiskMonitor) {
+		reactiveRepository.save(reactiveRiskMonitor).subscribe(result -> log.info("ReactiveRiskMonitor has been saved: {}", result));
+//		log.info("Successfully Persisted the ReactiveRiskMonitor {} ", reactiveRiskMonitor);
 	}
 
 	public void handleRecovery(ConsumerRecord<String, String> record) {

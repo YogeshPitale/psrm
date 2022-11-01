@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-@Document(collection = "wiredetails")
+@Document
 public class WireDetailsEvent {
-	
+
 	@Transient
 	public static final String SEQUENCE_NAME = "users_sequence";
 
