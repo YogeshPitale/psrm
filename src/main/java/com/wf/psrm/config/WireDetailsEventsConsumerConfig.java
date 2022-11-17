@@ -46,28 +46,28 @@ public class WireDetailsEventsConsumerConfig {
 			// persist
 		}));
 		factory.setRetryTemplate(retryTemplate());
-		factory.setRecoveryCallback((context -> {
-			if (context.getLastThrowable().getCause() instanceof RecoverableDataAccessException) {
-				// invoke recovery logic
-				log.info("Inside the recoverable logic");
-				/*
-				 * Arrays.asList(context.attributeNames()) .forEach(attributeName -> {
-				 * log.info("Attribute name is : {} ", attributeName);
-				 * log.info("Attribute Value is : {} ", context.getAttribute(attributeName));
-				 * });
-				 */
-
-				@SuppressWarnings("unchecked")
-				ConsumerRecord<String, String> consumerRecord = (ConsumerRecord<String, String>) context
-						.getAttribute("record");
-				wireDetailsEventsService.handleRecovery(consumerRecord);
-			} else {
-				log.info("Inside the non recoverable logic");
-				throw new RuntimeException(context.getLastThrowable().getMessage());
-			}
-
-			return null;
-		}));
+//		factory.setRecoveryCallback((context -> {
+//			if (context.getLastThrowable().getCause() instanceof RecoverableDataAccessException) {
+//				// invoke recovery logic
+//				log.info("Inside the recoverable logic");
+//				/*
+//				 * Arrays.asList(context.attributeNames()) .forEach(attributeName -> {
+//				 * log.info("Attribute name is : {} ", attributeName);
+//				 * log.info("Attribute Value is : {} ", context.getAttribute(attributeName));
+//				 * });
+//				 */
+//
+//				@SuppressWarnings("unchecked")
+//				ConsumerRecord<String, String> consumerRecord = (ConsumerRecord<String, String>) context
+//						.getAttribute("record");
+//				wireDetailsEventsService.handleRecovery(consumerRecord);
+//			} else {
+//				log.info("Inside the non recoverable logic");
+//				throw new RuntimeException(context.getLastThrowable().getMessage());
+//			}
+//
+//			return null;
+//		}));
 		return factory;
 	}
 
